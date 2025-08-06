@@ -1,75 +1,105 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Image, ScrollView, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { CircularProgress } from '../../components/CircularProgress'
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function Index() {
+  // Mock data for team statistics
+  const teamStats = {
+    wins: 10,
+    losses: 9,
+    draws: 3,
+    totalGames: 22,
+    winRate: 45.5, // (10/22) * 100
+    drawRate: 13.6, // (3/22) * 100
+    lossRate: 40.9, // (9/22) * 100
+  }
 
-export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
-}
+    <SafeAreaView
+      edges={['left', 'right', 'bottom']}
+      className='flex-1 bg-gray-50'
+    >
+      <ScrollView className='flex-1'>
+        <View className='p-6'>
+          {/* Team Shield Card */}
+          <View className='bg-white rounded-xl shadow-lg p-6 mb-6'>
+            <View className='items-center mb-4'>
+              <Image
+                source={require('../../assets/images/hustoniasfc.png')}
+                className='w-24 h-24 rounded-full'
+                resizeMode='contain'
+              />
+            </View>
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+            <Text className='text-2xl font-roboto-bold text-center text-gray-900 mb-2'>
+              Houstonias FC
+            </Text>
+
+            {/* Win/Loss/Draw Stats */}
+            <View className='flex-row justify-center gap-4'>
+              <View className='items-center'>
+                <Text className='text-2xl font-roboto-black text-gray-900'>
+                  {teamStats.wins}
+                </Text>
+                <Text className='text-sm font-roboto-light text-gray-500'>
+                  Wins
+                </Text>
+              </View>
+
+              <View className='items-center'>
+                <Text className='text-2xl font-roboto-black text-gray-900'>
+                  {teamStats.losses}
+                </Text>
+                <Text className='text-sm font-roboto-light text-gray-500'>
+                  Losses
+                </Text>
+              </View>
+
+              <View className='items-center'>
+                <Text className='text-2xl font-roboto-black text-gray-900'>
+                  {teamStats.draws}
+                </Text>
+                <Text className='text-sm font-roboto-light text-gray-500'>
+                  Draws
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Win Rate and Draw Rate Charts */}
+          <View className='bg-white rounded-xl shadow-lg p-6 mb-6'>
+            <Text className='text-xl font-roboto-bold text-gray-900 mb-4'>
+              Season Performance
+            </Text>
+
+            <View className='flex-row space-x-4'>
+              {/* Win Rate Chart */}
+              <View className='flex-1 items-center'>
+                <CircularProgress
+                  percentage={teamStats.winRate}
+                  color='#FF6B35'
+                  size={100}
+                />
+                <Text className='text-sm font-roboto-light text-gray-500 mt-2'>
+                  Win Rate
+                </Text>
+              </View>
+
+              {/* Draw Rate Chart */}
+              <View className='flex-1 items-center'>
+                <CircularProgress
+                  percentage={teamStats.drawRate}
+                  color='#FF6B35'
+                  size={100}
+                />
+                <Text className='text-sm font-roboto-light text-gray-500 mt-2'>
+                  Draw Rate
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
