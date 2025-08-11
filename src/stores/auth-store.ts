@@ -1,0 +1,117 @@
+import { create } from 'zustand'
+import {
+  authService,
+  LoginCredentials,
+  RegisterCredentials,
+  User,
+} from '../services/auth-service'
+
+interface AuthState {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  error: string | null
+
+  // Actions
+  initialize: () => Promise<void>
+  login: (credentials: LoginCredentials) => Promise<void>
+  register: (credentials: RegisterCredentials) => Promise<void>
+  logout: () => Promise<void>
+  clearError: () => void
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
+
+  initialize: async () => {
+    try {
+      set({ isLoading: true, error: null })
+      await authService.initialize()
+
+      const currentUser = authService.getUser()
+      const isAuth = authService.isAuthenticated()
+
+      set({
+        user: currentUser,
+        isAuthenticated: isAuth,
+        isLoading: false,
+      })
+    } catch (error) {
+      console.error('Error initializing auth:', error)
+      set({
+        isLoading: false,
+        error: 'Failed to initialize authentication',
+      })
+    }
+  },
+
+  login: async (credentials: LoginCredentials) => {
+    try {
+      set({ isLoading: true, error: null })
+      const response = await authService.login(credentials)
+
+      set({
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      })
+    } catch (error) {
+      console.error('Login error:', error)
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Login failed',
+      })
+      throw error
+    }
+  },
+
+  register: async (credentials: RegisterCredentials) => {
+    try {
+      set({ isLoading: true, error: null })
+      const response = await authService.register(credentials)
+
+      set({
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      })
+    } catch (error) {
+      console.error('Register error:', error)
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Registration failed',
+      })
+      throw error
+    }
+  },
+
+  logout: async () => {
+    try {
+      set({ isLoading: true, error: null })
+      await authService.logout()
+
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      })
+    } catch (error) {
+      console.error('Logout error:', error)
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Logout failed',
+      })
+      throw error
+    }
+  },
+
+  clearError: () => {
+    set({ error: null })
+  },
+}))

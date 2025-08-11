@@ -1,20 +1,17 @@
 import { Redirect, Stack } from 'expo-router'
-import { SafeAreaView } from 'react-native'
 
 export default function AuthLayout() {
-  const isAuthenticated = true
+  const isAuthenticated = false
 
+  // Use Redirect component instead of router.replace
   if (isAuthenticated) {
     return <Redirect href='/(tabs)' />
   }
 
   return (
-    <SafeAreaView>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
-    </SafeAreaView>
+    <Stack>
+      <Stack.Screen name='auth' options={{ headerShown: false }} />
+      <Stack.Screen name='users' options={{ headerShown: false }} />
+    </Stack>
   )
 }
