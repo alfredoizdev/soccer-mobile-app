@@ -75,10 +75,16 @@ export interface Event {
   description?: string
   startDate: string
   endDate?: string
+  date: string // Main date field for display
   location?: string
-  type: 'game' | 'practice' | 'meeting' | 'tournament'
+  latitude?: number // For map coordinates
+  longitude?: number // For map coordinates
+  type: 'match' | 'practice' | 'meeting' | 'tournament'
   status: 'scheduled' | 'active' | 'completed' | 'cancelled'
   organizationId: string
+  homeTeam?: string // For match format
+  awayTeam?: string // For match format
+  notes?: string // Additional notes
   createdAt: string
   updatedAt: string
 }

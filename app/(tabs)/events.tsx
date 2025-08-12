@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import { router } from 'expo-router'
 import { useEffect, useState } from 'react'
 import {
   RefreshControl,
@@ -35,7 +36,10 @@ export default function EventsScreen() {
   }
 
   const handleGamePress = (game: Game) => {
-    // TODO: Navigate to game details
+    // Navigate to match details page (using matches API)
+    console.log('🎯 Events tab - Navigating to event with game data:', JSON.stringify(game, null, 2))
+    console.log('🎯 Events tab - Game ID:', game.id)
+    router.push(`/event/${game.id}`)
   }
 
   // Show loading state

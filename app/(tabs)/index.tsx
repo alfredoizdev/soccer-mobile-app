@@ -73,7 +73,10 @@ export default function Index() {
   }
 
   const handleGamePress = (game: any) => {
-    // TODO: Navigate to game details
+    // Navigate to match details page
+    console.log('🎯 Navigating to event with game data:', JSON.stringify(game, null, 2))
+    console.log('🎯 Game ID:', game.id)
+    router.push(`/event/${game.id}`)
   }
 
   const teamStats = getTeamStats()

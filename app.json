@@ -19,7 +19,11 @@
               "NSExceptionMinimumTLSVersion": "1.0"
             }
           }
-        }
+        },
+        "NSLocationWhenInUseUsageDescription": "This app uses location to show nearby events and provide navigation to event locations."
+      },
+      "config": {
+        "googleMapsApiKey": "AIzaSyDEGZqvZ5WwSfLI32EB2fWQBTkJraqj0kA"
       }
     },
     "android": {
@@ -28,7 +32,16 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": ["android.permission.INTERNET"]
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDEGZqvZ5WwSfLI32EB2fWQBTkJraqj0kA"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +50,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-location",
       [
         "expo-splash-screen",
         {
@@ -44,6 +58,12 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-maps",
+        {
+          "googleMapsApiKey": "AIzaSyDEGZqvZ5WwSfLI32EB2fWQBTkJraqj0kA"
         }
       ]
     ],
