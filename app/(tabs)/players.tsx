@@ -27,8 +27,25 @@ export default function PlayersScreen() {
     if (isAuthenticated && user) {
       fetchUserOrganization()
     }
+
+    // Subscribe to user changes to auto-refresh when organizationId changes
+    const unsubscribe = useOrganizationStore.getState().subscribeToUserChanges()
+
+    return () => {
+      unsubscribe()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user])
+
+  // Additional effect to handle user organizationId changes
+  useEffect(() => {
+    if (user?.organizationId) {
+      console.log(
+        'Players page: User organizationId changed, fetching organization...'
+      )
+      fetchUserOrganization()
+    }
+  }, [user?.organizationId, fetchUserOrganization])
 
   // Filter players based on search query
   useEffect(() => {

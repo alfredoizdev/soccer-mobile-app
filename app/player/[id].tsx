@@ -251,11 +251,11 @@ export default function PlayerDetailScreen() {
                 {/* Background circle */}
                 <View className='absolute w-32 h-32 rounded-full border-8 border-gray-700' />
 
-                {/* Progress circle - simple and visible */}
+                {/* Progress circle based on average rating */}
                 <View
                   className='absolute w-32 h-32 rounded-full border-8'
                   style={{
-                    borderTopColor: '#10B981',
+                    borderTopColor: '#10B981', // Green color
                     borderRightColor:
                       parseFloat(calculateAverageRating()) > 1.5
                         ? '#10B981'

@@ -1,77 +1,90 @@
-import { Ionicons } from '@expo/vector-icons'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import React from 'react'
+import { Alert, Image, Text, TouchableOpacity, View } from 'react-native'
+import { useOrganizationStore } from '../stores/organization-store'
 
-export interface TeamHeaderProps {
+interface TeamHeaderProps {
   organization: {
+    id: string
     name: string
+    description: string
     avatar?: string
+    playerCount?: number
+    createdAt: string
   }
-  stats: {
-    wins: number
-    draws: number
-    losses: number
-  }
-  onMenuPress: () => void
 }
 
-export function TeamHeader({
-  organization,
-  stats,
-  onMenuPress,
-}: TeamHeaderProps) {
-  return (
-    <View className='px-4 pt-4 pb-6'>
-      <View className='flex-row items-center justify-between mb-6'>
-        <TouchableOpacity onPress={onMenuPress}>
-          <Ionicons name='menu' size={24} color='white' />
-        </TouchableOpacity>
+const TeamHeader: React.FC<TeamHeaderProps> = ({ organization }) => {
+  const { unsubscribeFromTeam, isLoading } = useOrganizationStore()
 
-        <View className='items-center'>
-          <View className='bg-white rounded-full p-2 mb-2'>
-            {organization.avatar ? (
-              <Image
-                source={{ uri: organization.avatar }}
-                className='w-16 h-16 rounded-full'
-                resizeMode='cover'
-              />
-            ) : (
-              <View className='w-16 h-16 bg-red-500 rounded-full items-center justify-center'>
-                <Text className='text-white font-bold text-lg'>
-                  {organization.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-            )}
+  const handleUnsubscribe = () => {
+    Alert.alert(
+      'Unsubscribe from Team',
+      `Are you sure you want to unsubscribe from ${organization.name}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Unsubscribe',
+          style: 'destructive',
+          onPress: unsubscribeFromTeam,
+        },
+      ]
+    )
+  }
+
+  return (
+    <View className='bg-white rounded-2xl p-6 mb-6 shadow-xl border border-gray-100'>
+      <View className='flex-row items-center mb-6'>
+        {/* Team Logo - Large and prominent */}
+        {organization.avatar ? (
+          <Image
+            source={{ uri: organization.avatar }}
+            className='w-28 h-28 rounded-3xl mr-6'
+            resizeMode='cover'
+          />
+        ) : (
+          <View className='w-28 h-28 rounded-3xl bg-gradient-to-br from-red-500 to-pink-600 mr-6 items-center justify-center shadow-xl'>
+            <Text className='text-white text-5xl font-bold'>
+              {organization.name.charAt(0).toUpperCase()}
+            </Text>
           </View>
-          <Text className='text-white font-bold text-xl text-center'>
+        )}
+
+        <View className='flex-1'>
+          <Text className='text-3xl font-bold text-gray-800 mb-3'>
             {organization.name}
           </Text>
+          <Text className='text-gray-600 text-lg leading-7 mb-4'>
+            {organization.description}
+          </Text>
+          {organization.playerCount && (
+            <View className='flex-row items-center'>
+              <View className='bg-gradient-to-r from-green-500 to-emerald-600 px-5 py-3 rounded-full'>
+                <Text className='text-white text-base font-bold'>
+                  {organization.playerCount}{' '}
+                  {organization.playerCount === 1 ? 'Player' : 'Players'}
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
-
-        <View className='w-6' />
       </View>
 
-      {/* Team Stats */}
-      <View className='bg-white/20 rounded-lg p-4 mb-6'>
-        <Text className='text-white font-semibold text-lg mb-3 text-center'>
-          Season Stats
+      {/* Unsubscribe Button */}
+      <TouchableOpacity
+        onPress={handleUnsubscribe}
+        disabled={isLoading}
+        className='bg-gradient-to-r from-red-500 to-pink-600 py-5 px-8 rounded-xl items-center shadow-lg'
+        activeOpacity={0.8}
+      >
+        <Text className='text-white font-bold text-xl'>
+          {isLoading ? 'Unsubscribing...' : 'Unsubscribe from Team'}
         </Text>
-        <View className='flex-row justify-center items-center gap-4'>
-          <View className='items-center'>
-            <Text className='text-white font-bold text-2xl'>{stats.wins}</Text>
-            <Text className='text-white text-sm opacity-80'>Wins</Text>
-          </View>
-          <View className='items-center'>
-            <Text className='text-white font-bold text-2xl'>{stats.draws}</Text>
-            <Text className='text-white text-sm opacity-80'>Draws</Text>
-          </View>
-          <View className='items-center'>
-            <Text className='text-white font-bold text-2xl'>
-              {stats.losses}
-            </Text>
-            <Text className='text-white text-sm opacity-80'>Losses</Text>
-          </View>
-        </View>
-      </View>
+      </TouchableOpacity>
     </View>
   )
 }
+
+export default TeamHeader

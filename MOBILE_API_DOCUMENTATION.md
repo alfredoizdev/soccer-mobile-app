@@ -260,9 +260,197 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
+### 6. Unsubscribe de Usuario del Equipo - `POST /api/users/unsubscribe`
+
+**Descripción:** Permite a un usuario hacer unsubscribe del equipo al que está suscrito.
+
+**Headers:**
+
+```
+Authorization: Bearer <token_jwt>
+Content-Type: application/json
+```
+
+**Body:**
+
+```json
+{
+  "userId": "uuid-del-usuario"
+}
+```
+
+**Ejemplo de Request:**
+
+```
+POST /api/users/unsubscribe
+Headers:
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Ejemplo de Response (Éxito):**
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "name": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "avatar": "https://res.cloudinary.com/...",
+    "organizationId": null,
+    "status": "active",
+    "role": "user",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  "success": true,
+  "message": "User successfully unsubscribed from team"
+}
+```
+
+**Ejemplo de Response (Usuario ya sin equipo):**
+
+```json
+{
+  "error": "User is not subscribed to any team",
+  "success": false
+}
+```
+
+### 7. Verificar Estado de Suscripción - `GET /api/users/unsubscribe`
+
+**Descripción:** Verifica si un usuario está suscrito a algún equipo.
+
+**Headers:**
+
+```
+Authorization: Bearer <token_jwt>
+Content-Type: application/json
+```
+
+**Parámetros de Query:**
+
+- `userId` (requerido): UUID del usuario
+
+**Ejemplo de Request:**
+
+```
+GET /api/users/unsubscribe?userId=123e4567-e89b-12d3-a456-426614174000
+Headers:
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Ejemplo de Response:**
+
+```json
+{
+  "userId": "uuid",
+  "isSubscribed": false,
+  "organizationId": null,
+  "success": true
+}
+```
+
+### 8. Suscribirse a un Equipo - `POST /api/users/subscribe`
+
+**Descripción:** Permite a un usuario suscribirse a un equipo/organización.
+
+**Headers:**
+
+```
+Authorization: Bearer <token_jwt>
+Content-Type: application/json
+```
+
+**Body:**
+
+```json
+{
+  "userId": "uuid-del-usuario",
+  "organizationId": "uuid-del-equipo"
+}
+```
+
+**Ejemplo de Request:**
+
+```
+POST /api/users/subscribe
+Headers:
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+
+{
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "organizationId": "987fcdeb-51a2-43d1-b456-426614174000"
+}
+```
+
+**Ejemplo de Response (Éxito):**
+
+```json
+{
+  "success": true,
+  "message": "User successfully subscribed to team",
+  "data": {
+    "userId": "uuid",
+    "organizationId": "uuid",
+    "joinedAt": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Ejemplo de Response (Error):**
+
+```json
+{
+  "error": "User is already subscribed to a team",
+  "success": false
+}
+```
+
+### 9. Verificar Elegibilidad para Unirse - `GET /api/users/subscribe`
+
+**Descripción:** Verifica si un usuario puede unirse a un equipo específico.
+
+**Headers:**
+
+```
+Authorization: Bearer <token_jwt>
+Content-Type: application/json
+```
+
+**Parámetros de Query:**
+
+- `userId` (requerido): UUID del usuario
+- `organizationId` (requerido): UUID del equipo
+
+**Ejemplo de Request:**
+
+```
+GET /api/users/subscribe?userId=123e4567-e89b-12d3-a456-426614174000&organizationId=987fcdeb-51a2-43d1-b456-426614174000
+Headers:
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Ejemplo de Response:**
+
+```json
+{
+  "canJoin": true,
+  "userId": "uuid",
+  "organizationId": "uuid",
+  "success": true
+}
+```
+
 ## Jugadores
 
-### 6. Lista de Jugadores - `GET /api/players`
+### 10. Lista de Jugadores - `GET /api/players`
 
 **Descripción:** Obtiene una lista paginada de jugadores.
 
@@ -328,7 +516,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 7. Jugador Específico - `GET /api/players/{id}`
+### 11. Jugador Específico - `GET /api/players/{id}`
 
 **Descripción:** Obtiene un jugador específico con sus estadísticas.
 
@@ -403,7 +591,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## Organizaciones/Equipos
 
-### 8. Lista de Organizaciones - `GET /api/organizations`
+### 12. Lista de Organizaciones - `GET /api/organizations`
 
 **Descripción:** Obtiene una lista paginada de organizaciones/equipos.
 
@@ -454,7 +642,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 9. Organización Específica - `GET /api/organizations/{id}`
+### 13. Organización Específica - `GET /api/organizations/{id}`
 
 **Descripción:** Obtiene una organización específica con sus jugadores.
 
@@ -517,7 +705,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## Partidos
 
-### 10. Lista de Partidos - `GET /api/matches`
+### 14. Lista de Partidos - `GET /api/matches`
 
 **Descripción:** Obtiene una lista paginada de partidos.
 
@@ -588,7 +776,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 11. Partido Específico - `GET /api/matches/{id}`
+### 15. Partido Específico - `GET /api/matches/{id}`
 
 **Descripción:** Obtiene un partido específico con estadísticas y eventos.
 
@@ -683,7 +871,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## Posts/Noticias
 
-### 12. Lista de Posts - `GET /api/posts`
+### 16. Lista de Posts - `GET /api/posts`
 
 **Descripción:** Obtiene una lista paginada de posts/noticias.
 
@@ -744,7 +932,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 13. Post Específico - `GET /api/posts/{slug}`
+### 17. Post Específico - `GET /api/posts/{slug}`
 
 **Descripción:** Obtiene un post específico por slug.
 
@@ -794,7 +982,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## Streaming
 
-### 14. Streams Activos - `GET /api/streaming/active`
+### 18. Streams Activos - `GET /api/streaming/active`
 
 **Descripción:** Obtiene todos los streams activos.
 
@@ -1044,6 +1232,95 @@ const searchPlayers = async (token, query, organizationId = null) => {
     throw error
   }
 }
+
+// Unsubscribe de usuario del equipo (requiere autenticación)
+const unsubscribeFromTeam = async (token, userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/unsubscribe`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify({ userId }),
+    })
+    const data = await response.json()
+
+    if (data.success) {
+      return data.user
+    } else {
+      throw new Error(data.error)
+    }
+  } catch (error) {
+    console.error('Error unsubscribing from team:', error)
+    throw error
+  }
+}
+
+// Verificar estado de suscripción (requiere autenticación)
+const checkSubscriptionStatus = async (token, userId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/users/unsubscribe?userId=${userId}`,
+      { headers: getAuthHeaders(token) }
+    )
+    const data = await response.json()
+
+    if (data.success) {
+      return {
+        isSubscribed: data.isSubscribed,
+        organizationId: data.organizationId,
+      }
+    } else {
+      throw new Error(data.error)
+    }
+  } catch (error) {
+    console.error('Error checking subscription status:', error)
+    throw error
+  }
+}
+
+// Suscribirse a un equipo (requiere autenticación)
+const subscribeToTeam = async (token, userId, organizationId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/subscribe`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify({ userId, organizationId }),
+    })
+    const data = await response.json()
+
+    if (data.success) {
+      return data.data
+    } else {
+      throw new Error(data.error)
+    }
+  } catch (error) {
+    console.error('Error subscribing to team:', error)
+    throw error
+  }
+}
+
+// Verificar elegibilidad para unirse a un equipo (requiere autenticación)
+const checkTeamJoinEligibility = async (token, userId, organizationId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/users/subscribe?userId=${userId}&organizationId=${organizationId}`,
+      { headers: getAuthHeaders(token) }
+    )
+    const data = await response.json()
+
+    if (data.success) {
+      return {
+        canJoin: data.canJoin,
+        userId: data.userId,
+        organizationId: data.organizationId,
+      }
+    } else {
+      throw new Error(data.error)
+    }
+  } catch (error) {
+    console.error('Error checking team join eligibility:', error)
+    throw error
+  }
+}
 ```
 
 ## Endpoints Disponibles
@@ -1058,6 +1335,10 @@ const searchPlayers = async (token, query, organizationId = null) => {
 - `GET /api/users` - Lista de usuarios
 - `GET /api/users/{id}` - Usuario específico
 - `GET /api/users/search` - Búsqueda de usuarios
+- `POST /api/users/subscribe` - Suscribirse a un equipo
+- `GET /api/users/subscribe` - Verificar elegibilidad para unirse
+- `POST /api/users/unsubscribe` - Unsubscribe del equipo
+- `GET /api/users/unsubscribe` - Verificar estado de suscripción
 
 ### Jugadores (requiere token)
 

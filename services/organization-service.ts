@@ -104,12 +104,27 @@ class OrganizationService {
     try {
       const headers = authService.getAuthHeaders()
 
+      console.log(`Fetching organization with ID: ${id}`)
+      console.log(`API URL: ${this.API_BASE_URL}/organizations/${id}`)
+
       const response = await fetch(`${this.API_BASE_URL}/organizations/${id}`, {
         method: 'GET',
         headers,
       })
 
+      console.log(`Response status: ${response.status}`)
+      console.log(`Response headers:`, response.headers)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`HTTP error response: ${errorText}`)
+        throw new Error(
+          `HTTP error! status: ${response.status}, response: ${errorText}`
+        )
+      }
+
       const data: OrganizationResponse | ApiError = await response.json()
+      console.log(`API response:`, data)
 
       if (!data.success) {
         throw new Error((data as ApiError).error)
@@ -128,14 +143,42 @@ class OrganizationService {
   async getUserOrganization(): Promise<Organization | null> {
     try {
       const user = authService.getUser()
+      console.log('🔍 getUserOrganization - Current user:', {
+        id: user?.id,
+        name: user?.name,
+        organizationId: user?.organizationId,
+      })
 
-      if (!user || !user.organizationId) {
+      if (!user) {
+        console.log('❌ getUserOrganization - No user found, returning null')
         return null
       }
 
-      return await this.getOrganizationById(user.organizationId)
+      if (!user.organizationId) {
+        console.log(
+          '❌ getUserOrganization - User has no organizationId, returning null'
+        )
+        return null
+      }
+
+      console.log(
+        `📡 getUserOrganization - User has organizationId: ${user.organizationId}`
+      )
+      const organization = await this.getOrganizationById(user.organizationId)
+      console.log(
+        '✅ getUserOrganization - Successfully fetched organization:',
+        {
+          id: organization.id,
+          name: organization.name,
+          playerCount: organization.players?.length || 0,
+        }
+      )
+      return organization
     } catch (error) {
-      console.error('Error fetching user organization:', error)
+      console.error(
+        '💥 getUserOrganization - Error fetching user organization:',
+        error
+      )
       throw error
     }
   }
@@ -170,23 +213,46 @@ class OrganizationService {
         params.append('search', search)
       }
 
-      const response = await fetch(
-        `${this.API_BASE_URL}/organizations?${params.toString()}`,
-        {
-          method: 'GET',
-          headers,
-        }
-      )
+      const url = `${this.API_BASE_URL}/organizations?${params.toString()}`
+      console.log(`Fetching organizations from: ${url}`)
+      console.log('Headers:', headers)
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      })
+
+      console.log(`Organizations response status: ${response.status}`)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`Organizations HTTP error response: ${errorText}`)
+        throw new Error(
+          `HTTP error! status: ${response.status}, response: ${errorText}`
+        )
+      }
 
       const data = await response.json()
+      console.log(`Organizations API response:`, data)
 
       if (!data.success) {
         throw new Error(data.error)
       }
 
+      console.log(
+        `Successfully fetched ${data.organizations?.length || 0} organizations`
+      )
+
       return {
-        organizations: data.organizations,
-        pagination: data.pagination,
+        organizations: data.organizations || [],
+        pagination: data.pagination || {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
       }
     } catch (error) {
       console.error('Error fetching organizations:', error)
@@ -362,6 +428,190 @@ class OrganizationService {
           'An unexpected error occurred while fetching player data'
         )
       }
+    }
+  }
+
+  /**
+   * Subscribe to a team
+   */
+  async subscribeToTeam(organizationId: string): Promise<void> {
+    try {
+      console.log(
+        '🎯 OrganizationService.subscribeToTeam called with:',
+        organizationId
+      )
+
+      const headers = authService.getAuthHeaders()
+      const user = authService.getUser()
+
+      if (!user) {
+        console.log(
+          '❌ OrganizationService.subscribeToTeam - User not authenticated'
+        )
+        throw new Error('User not authenticated')
+      }
+
+      console.log(
+        `📡 OrganizationService.subscribeToTeam - Subscribing user ${user.id} to organization ${organizationId}`
+      )
+
+      // Use the correct subscribe endpoint from the API documentation
+      const response = await fetch(`${this.API_BASE_URL}/users/subscribe`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          userId: user.id,
+          organizationId,
+        }),
+      })
+
+      console.log(
+        `📡 OrganizationService.subscribeToTeam - Response status: ${response.status}`
+      )
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(
+          `💥 OrganizationService.subscribeToTeam - HTTP error response: ${errorText}`
+        )
+        throw new Error(
+          `HTTP error! status: ${response.status}, response: ${errorText}`
+        )
+      }
+
+      const data = await response.json()
+      console.log(
+        `✅ OrganizationService.subscribeToTeam - API response:`,
+        data
+      )
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to subscribe to team')
+      }
+
+      console.log(
+        '🎉 OrganizationService.subscribeToTeam - Successfully subscribed to team'
+      )
+    } catch (error) {
+      console.error(
+        '💥 OrganizationService.subscribeToTeam - Error subscribing to team:',
+        error
+      )
+      throw error
+    }
+  }
+
+  /**
+   * Check current subscription status
+   */
+  async checkSubscriptionStatus(): Promise<{
+    isSubscribed: boolean
+    organizationId: string | null
+  }> {
+    try {
+      const headers = authService.getAuthHeaders()
+      const user = authService.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const response = await fetch(
+        `${this.API_BASE_URL}/users/unsubscribe?userId=${user.id}`,
+        {
+          method: 'GET',
+          headers,
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to check subscription status')
+      }
+
+      return {
+        isSubscribed: data.isSubscribed,
+        organizationId: data.organizationId,
+      }
+    } catch (error) {
+      console.error('Error checking subscription status:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Check if user can join a team
+   */
+  async checkTeamJoinEligibility(organizationId: string): Promise<boolean> {
+    try {
+      const headers = authService.getAuthHeaders()
+      const user = authService.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const response = await fetch(
+        `${this.API_BASE_URL}/users/subscribe?userId=${user.id}&organizationId=${organizationId}`,
+        {
+          method: 'GET',
+          headers,
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to check eligibility')
+      }
+
+      return data.canJoin
+    } catch (error) {
+      console.error('Error checking team join eligibility:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Unsubscribe from current team
+   */
+  async unsubscribeFromTeam(): Promise<void> {
+    try {
+      const headers = authService.getAuthHeaders()
+      const user = authService.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      // Use the correct unsubscribe endpoint from the API documentation
+      const response = await fetch(`${this.API_BASE_URL}/users/unsubscribe`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ userId: user.id }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to unsubscribe from team')
+      }
+    } catch (error) {
+      console.error('Error unsubscribing from team:', error)
+      throw error
     }
   }
 }

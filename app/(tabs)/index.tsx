@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native'
 import { PlayersSection } from '../../components/players-section'
-import { TeamHeader } from '../../components/team-header'
+import TeamHeaderHome from '../../components/team-header-home'
 import { useAuthStore } from '../../stores/auth-store'
 import { useOrganizationStore } from '../../stores/organization-store'
 
@@ -22,18 +22,58 @@ const getTeamStats = () => ({
 
 export default function Index() {
   const { user, isAuthenticated } = useAuthStore()
-  const { userOrganization, isLoading, error, fetchUserOrganization } =
-    useOrganizationStore()
+  const {
+    userOrganization,
+    isLoading,
+    error,
+    isInitialized,
+    hasAttemptedFetch,
+    fetchUserOrganization,
+  } = useOrganizationStore()
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      fetchUserOrganization()
+      console.log('Home page: User authenticated, fetching organization...')
+      console.log('User organizationId:', user.organizationId)
+      console.log('User object:', user)
+
+      // Only fetch organization if user has organizationId
+      if (user.organizationId) {
+        console.log(
+          'Home page: Fetching organization with ID:',
+          user.organizationId
+        )
+        fetchUserOrganization()
+      } else {
+        console.log(
+          'Home page: User has no organizationId, showing no team state'
+        )
+      }
+    } else {
+      console.log('Home page: User not authenticated or no user')
+    }
+
+    // Subscribe to user changes to auto-refresh when organizationId changes
+    const unsubscribe = useOrganizationStore.getState().subscribeToUserChanges()
+
+    return () => {
+      unsubscribe()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user])
 
+  // Additional effect to handle user organizationId changes
+  useEffect(() => {
+    if (user?.organizationId) {
+      console.log(
+        'Home page: User organizationId changed, fetching organization...'
+      )
+      fetchUserOrganization()
+    }
+  }, [user?.organizationId, fetchUserOrganization])
+
   const handleRefresh = () => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && user.organizationId) {
       fetchUserOrganization()
     }
   }
@@ -53,8 +93,20 @@ export default function Index() {
 
   const teamStats = getTeamStats()
 
-  // Show loading state
-  if (isLoading) {
+  // Debug logging
+  console.log('Home page render state:', {
+    isAuthenticated,
+    hasUser: !!user,
+    userOrganizationId: user?.organizationId,
+    userOrganization,
+    isLoading,
+    error,
+    isInitialized,
+    hasAttemptedFetch,
+  })
+
+  // Show loading state only when we're actually loading and have organizationId
+  if (isLoading && user?.organizationId && !hasAttemptedFetch) {
     return (
       <LinearGradient colors={['#EF4444', '#8B5CF6']} style={{ flex: 1 }}>
         <View className='flex-1'>
@@ -69,7 +121,7 @@ export default function Index() {
   }
 
   // Show error state
-  if (error) {
+  if (error && user?.organizationId && hasAttemptedFetch) {
     return (
       <LinearGradient colors={['#EF4444', '#8B5CF6']} style={{ flex: 1 }}>
         <View className='flex-1'>
@@ -92,8 +144,12 @@ export default function Index() {
     )
   }
 
-  // Show no team state
-  if (!userOrganization) {
+  // Show no team state (when user has no organizationId or organization not found)
+  if (
+    !userOrganization ||
+    !user?.organizationId ||
+    (hasAttemptedFetch && !userOrganization)
+  ) {
     return (
       <LinearGradient colors={['#EF4444', '#8B5CF6']} style={{ flex: 1 }}>
         <View className='flex-1'>
@@ -101,9 +157,17 @@ export default function Index() {
             <Text className='text-white text-lg text-center mb-4'>
               No team assigned
             </Text>
-            <Text className='text-white/80 text-sm text-center'>
-              Contact your administrator to join a team.
+            <Text className='text-white/80 text-sm text-center mb-6'>
+              {user?.organizationId
+                ? 'Your previous team is no longer available. Please select a new team.'
+                : 'You are not currently subscribed to any team. Go to the Teams tab to join a team.'}
             </Text>
+            <TouchableOpacity
+              onPress={() => router.push('/teams')}
+              className='bg-white/20 px-6 py-3 rounded-lg'
+            >
+              <Text className='text-white font-semibold'>Go to Teams</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </LinearGradient>
@@ -112,8 +176,8 @@ export default function Index() {
 
   return (
     <LinearGradient colors={['#EF4444', '#8B5CF6']} style={{ flex: 1 }}>
-      <View className='flex-1'>
-        <TeamHeader
+      <View className='flex-1 pt-10'>
+        <TeamHeaderHome
           organization={userOrganization}
           stats={teamStats}
           onMenuPress={handleMenuPress}
