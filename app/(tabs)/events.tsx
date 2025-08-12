@@ -36,7 +36,6 @@ export default function EventsScreen() {
 
   const handleGamePress = (game: Game) => {
     // TODO: Navigate to game details
-    console.log('Game pressed:', game)
   }
 
   // Show loading state

@@ -28,7 +28,6 @@ const Teams = () => {
     isLoadingOrganizations,
     error,
     isInitialized,
-    hasAttemptedFetch,
     fetchUserOrganization,
     fetchAllOrganizations,
     clearError,
@@ -43,6 +42,7 @@ const Teams = () => {
     return () => {
       unsubscribe()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Additional effect to handle userOrganization changes

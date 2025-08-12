@@ -127,46 +127,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   updateUser: async (userData: Partial<User>) => {
     try {
-      console.log('🔄 Starting updateUser with data:', userData)
-
       // Update user in auth service (this will also update AsyncStorage)
-      console.log('📡 Updating user in auth service...')
       await authService.updateUser(userData)
-      console.log('✅ Successfully updated user in auth service')
 
       // Update local state
-      console.log('🔄 Updating local state...')
       set((state) => {
         if (!state.user) {
-          console.log('❌ No user in state, cannot update')
           return state
         }
         const updatedUser = { ...state.user, ...userData }
-        console.log('✅ Updated user in store:', {
-          id: updatedUser.id,
-          name: updatedUser.name,
-          organizationId: updatedUser.organizationId,
-        })
         return { user: updatedUser }
       })
-
-      // Verify the update was successful
-      const currentState = get()
-      console.log('🔍 Verifying update in store:', {
-        id: currentState.user?.id,
-        name: currentState.user?.name,
-        organizationId: currentState.user?.organizationId,
-      })
-
-      // If organizationId was updated, we need to refresh organization data
-      // This will be handled by the organization store when it detects the change
-      if (userData.organizationId !== undefined) {
-        console.log(
-          '🔍 OrganizationId updated, organization store should refresh automatically'
-        )
-      }
     } catch (error) {
-      console.error('💥 Error updating user:', error)
+      console.error('Error updating user:', error)
     }
   },
 
@@ -177,26 +150,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Force reload user from AsyncStorage
   forceReloadUser: async () => {
     try {
-      console.log('🔄 Force reloading user from AsyncStorage...')
       await authService.initialize()
 
       const currentUser = authService.getUser()
       const isAuth = authService.isAuthenticated()
 
-      console.log('🔍 Reloaded user:', {
-        id: currentUser?.id,
-        name: currentUser?.name,
-        organizationId: currentUser?.organizationId,
-      })
-
       set({
         user: currentUser,
         isAuthenticated: isAuth,
       })
-
-      console.log('✅ User reloaded successfully')
     } catch (error) {
-      console.error('💥 Error force reloading user:', error)
+      console.error('Error force reloading user:', error)
     }
   },
 }))

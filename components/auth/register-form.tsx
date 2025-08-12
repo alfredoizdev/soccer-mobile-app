@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,6 +10,7 @@ import {
   View,
 } from 'react-native'
 import { useAuthStore } from '../../stores/auth-store'
+import { ToastService } from '../../services/toast-service'
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void
@@ -33,17 +33,17 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       !password.trim() ||
       !confirmPassword.trim()
     ) {
-      Alert.alert('Error', 'Please fill in all fields')
+      ToastService.error('Please fill in all fields')
       return
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match')
+      ToastService.error('Passwords do not match')
       return
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long')
+      ToastService.error('Password must be at least 6 characters long')
       return
     }
 

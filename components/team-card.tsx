@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Text,
   TouchableOpacity,
@@ -9,6 +8,7 @@ import {
 } from 'react-native'
 import { useAuthStore } from '../stores/auth-store'
 import { useOrganizationStore } from '../stores/organization-store'
+import { ToastService } from '../services/toast-service'
 
 interface TeamCardProps {
   team: {
@@ -37,7 +37,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
 
   const handleSubscribe = async () => {
     if (!user) {
-      Alert.alert('Error', 'You must be logged in to subscribe to a team')
+      ToastService.error('You must be logged in to subscribe to a team')
       return
     }
 
@@ -46,23 +46,10 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
       // Subscribe to the team using the store
       await subscribeToTeam(team.id)
 
-      Alert.alert(
-        'Success!',
-        `You have successfully subscribed to ${team.name}!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // The store will automatically update the UI
-              console.log('Successfully subscribed to team')
-            },
-          },
-        ]
-      )
+      ToastService.success(`You have successfully subscribed to ${team.name}!`)
     } catch (error) {
       console.error('Error subscribing to team:', error)
-      Alert.alert(
-        'Error',
+      ToastService.error(
         error instanceof Error ? error.message : 'Failed to subscribe to team'
       )
     } finally {
@@ -72,41 +59,25 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
 
   const handleUnsubscribe = async () => {
     if (!user) {
-      Alert.alert('Error', 'You must be logged in to unsubscribe from a team')
+      ToastService.error('You must be logged in to unsubscribe from a team')
       return
     }
 
-    Alert.alert(
-      'Unsubscribe from Team',
-      `Are you sure you want to unsubscribe from ${team.name}?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Unsubscribe',
-          style: 'destructive',
-          onPress: async () => {
-            setIsUnsubscribing(true)
-            try {
-              await unsubscribeFromTeam()
-              Alert.alert('Success!', `You have unsubscribed from ${team.name}`)
-            } catch (error) {
-              console.error('Error unsubscribing from team:', error)
-              Alert.alert(
-                'Error',
-                error instanceof Error
-                  ? error.message
-                  : 'Failed to unsubscribe from team'
-              )
-            } finally {
-              setIsUnsubscribing(false)
-            }
-          },
-        },
-      ]
-    )
+    // Directly unsubscribe without confirmation for better UX with toast feedback
+    setIsUnsubscribing(true)
+    try {
+      await unsubscribeFromTeam()
+      ToastService.success(`You have unsubscribed from ${team.name}`)
+    } catch (error) {
+      console.error('Error unsubscribing from team:', error)
+      ToastService.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to unsubscribe from team'
+      )
+    } finally {
+      setIsUnsubscribing(false)
+    }
   }
 
   // If user is subscribed to this team, show subscribed state
@@ -149,12 +120,10 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
                 style={{ width: 100, height: 100, borderRadius: 50 }}
                 resizeMode='cover'
                 onError={(error) => {
-                  console.log('Error cargando imagen:', error)
                   setImageError(true)
                   setImageLoading(false)
                 }}
                 onLoad={() => {
-                  console.log('Imagen cargada exitosamente:', team.avatar)
                   setImageLoading(false)
                 }}
               />
@@ -293,12 +262,10 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
                 style={{ width: 100, height: 100, borderRadius: 50 }}
                 resizeMode='cover'
                 onError={(error) => {
-                  console.log('Error cargando imagen:', error)
                   setImageError(true)
                   setImageLoading(false)
                 }}
                 onLoad={() => {
-                  console.log('Imagen cargada exitosamente:', team.avatar)
                   setImageLoading(false)
                 }}
               />
@@ -401,12 +368,10 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
               style={{ width: 100, height: 100, borderRadius: 50 }}
               resizeMode='cover'
               onError={(error) => {
-                console.log('Error cargando imagen:', error)
                 setImageError(true)
                 setImageLoading(false)
               }}
               onLoad={() => {
-                console.log('Imagen cargada exitosamente:', team.avatar)
                 setImageLoading(false)
               }}
             />

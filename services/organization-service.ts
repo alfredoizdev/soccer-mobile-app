@@ -104,16 +104,12 @@ class OrganizationService {
     try {
       const headers = authService.getAuthHeaders()
 
-      console.log(`Fetching organization with ID: ${id}`)
-      console.log(`API URL: ${this.API_BASE_URL}/organizations/${id}`)
 
       const response = await fetch(`${this.API_BASE_URL}/organizations/${id}`, {
         method: 'GET',
         headers,
       })
 
-      console.log(`Response status: ${response.status}`)
-      console.log(`Response headers:`, response.headers)
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -124,7 +120,6 @@ class OrganizationService {
       }
 
       const data: OrganizationResponse | ApiError = await response.json()
-      console.log(`API response:`, data)
 
       if (!data.success) {
         throw new Error((data as ApiError).error)
@@ -143,36 +138,16 @@ class OrganizationService {
   async getUserOrganization(): Promise<Organization | null> {
     try {
       const user = authService.getUser()
-      console.log('🔍 getUserOrganization - Current user:', {
-        id: user?.id,
-        name: user?.name,
-        organizationId: user?.organizationId,
-      })
 
       if (!user) {
-        console.log('❌ getUserOrganization - No user found, returning null')
         return null
       }
 
       if (!user.organizationId) {
-        console.log(
-          '❌ getUserOrganization - User has no organizationId, returning null'
-        )
         return null
       }
 
-      console.log(
-        `📡 getUserOrganization - User has organizationId: ${user.organizationId}`
-      )
       const organization = await this.getOrganizationById(user.organizationId)
-      console.log(
-        '✅ getUserOrganization - Successfully fetched organization:',
-        {
-          id: organization.id,
-          name: organization.name,
-          playerCount: organization.players?.length || 0,
-        }
-      )
       return organization
     } catch (error) {
       console.error(
@@ -214,15 +189,12 @@ class OrganizationService {
       }
 
       const url = `${this.API_BASE_URL}/organizations?${params.toString()}`
-      console.log(`Fetching organizations from: ${url}`)
-      console.log('Headers:', headers)
 
       const response = await fetch(url, {
         method: 'GET',
         headers,
       })
 
-      console.log(`Organizations response status: ${response.status}`)
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -233,15 +205,11 @@ class OrganizationService {
       }
 
       const data = await response.json()
-      console.log(`Organizations API response:`, data)
 
       if (!data.success) {
         throw new Error(data.error)
       }
 
-      console.log(
-        `Successfully fetched ${data.organizations?.length || 0} organizations`
-      )
 
       return {
         organizations: data.organizations || [],
@@ -436,24 +404,14 @@ class OrganizationService {
    */
   async subscribeToTeam(organizationId: string): Promise<void> {
     try {
-      console.log(
-        '🎯 OrganizationService.subscribeToTeam called with:',
-        organizationId
-      )
 
       const headers = authService.getAuthHeaders()
       const user = authService.getUser()
 
       if (!user) {
-        console.log(
-          '❌ OrganizationService.subscribeToTeam - User not authenticated'
-        )
         throw new Error('User not authenticated')
       }
 
-      console.log(
-        `📡 OrganizationService.subscribeToTeam - Subscribing user ${user.id} to organization ${organizationId}`
-      )
 
       // Use the correct subscribe endpoint from the API documentation
       const response = await fetch(`${this.API_BASE_URL}/users/subscribe`, {
@@ -465,9 +423,6 @@ class OrganizationService {
         }),
       })
 
-      console.log(
-        `📡 OrganizationService.subscribeToTeam - Response status: ${response.status}`
-      )
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -480,18 +435,11 @@ class OrganizationService {
       }
 
       const data = await response.json()
-      console.log(
-        `✅ OrganizationService.subscribeToTeam - API response:`,
-        data
-      )
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to subscribe to team')
       }
 
-      console.log(
-        '🎉 OrganizationService.subscribeToTeam - Successfully subscribed to team'
-      )
     } catch (error) {
       console.error(
         '💥 OrganizationService.subscribeToTeam - Error subscribing to team:',

@@ -48,27 +48,13 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
       const currentUser = state.user
       const currentState = get()
 
-      console.log('🔍 Auth store changed:', {
-        userId: currentUser?.id,
-        userOrganizationId: currentUser?.organizationId,
-        currentOrgId: currentState.userOrganization?.id,
-        hasUserOrg: !!currentState.userOrganization,
-      })
 
       // If user's organizationId changed, refresh organization data
       if (currentUser?.organizationId !== currentState.userOrganization?.id) {
-        console.log(
-          '🔄 User organizationId changed, refreshing organization data...'
-        )
         if (currentUser?.organizationId) {
-          console.log(
-            '📡 Fetching organization for ID:',
-            currentUser.organizationId
-          )
           get().fetchUserOrganization()
         } else {
           // User no longer has organization, clear it
-          console.log('❌ User no longer has organization, clearing it')
           set({ userOrganization: null })
         }
       }
@@ -79,18 +65,11 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
 
   fetchUserOrganization: async () => {
     try {
-      console.log('🚀 Starting fetchUserOrganization...')
       set({ isLoading: true, error: null, hasAttemptedFetch: true })
 
       const organization = await organizationService.getUserOrganization()
-      console.log('📡 API response for getUserOrganization:', organization)
 
       if (organization) {
-        console.log('✅ Organization found, updating state:', {
-          id: organization.id,
-          name: organization.name,
-          playerCount: organization.players?.length || 0,
-        })
         set({
           userOrganization: organization,
           isLoading: false,
@@ -99,7 +78,6 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
           hasAttemptedFetch: true,
         })
       } else {
-        console.log('❌ No organization found for user')
         // User is not subscribed to any organization
         set({
           userOrganization: null,
@@ -114,7 +92,6 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
 
       // Check if it's a 404 error (organization not found)
       if (error instanceof Error && error.message.includes('404')) {
-        console.log('🔍 Organization not found (404), handling gracefully')
         await get().handleOrganizationNotFound()
         return
       }
@@ -157,39 +134,24 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
 
   subscribeToTeam: async (organizationId: string) => {
     try {
-      console.log(
-        '🎯 Starting subscribeToTeam for organization:',
-        organizationId
-      )
       set({ isLoading: true, error: null })
 
-      console.log('📡 Calling organizationService.subscribeToTeam...')
       await organizationService.subscribeToTeam(organizationId)
-      console.log('✅ Successfully called organizationService.subscribeToTeam')
 
-      console.log('🔄 Updating user organizationId in auth store...')
       // Update user's organizationId in auth store
       await useAuthStore.getState().updateUser({ organizationId })
-      console.log('✅ Successfully updated user organizationId in auth store')
 
       // Verify that the organizationId was actually saved
       const updatedUser = useAuthStore.getState().user
-      console.log('🔍 Verifying updated user:', {
-        id: updatedUser?.id,
-        name: updatedUser?.name,
-        organizationId: updatedUser?.organizationId,
-      })
 
       if (updatedUser?.organizationId !== organizationId) {
         console.error('❌ CRITICAL: organizationId was not saved correctly!')
         throw new Error('Failed to save organizationId to user')
       }
 
-      console.log('🧹 Force complete state refresh after subscription...')
       // Force complete state refresh after subscription
       await get().forceRefreshAfterSubscription(organizationId)
 
-      console.log('🔄 Force update all screens...')
       // Force update all screens
       get().forceUpdateAllScreens()
 
@@ -198,7 +160,6 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
         error: null,
       })
 
-      console.log('🎉 Successfully subscribed to team and updated state')
     } catch (error) {
       console.error('💥 Error subscribing to team:', error)
       set({
@@ -268,10 +229,6 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   // Force complete state refresh after subscription
   forceRefreshAfterSubscription: async (organizationId: string) => {
     try {
-      console.log(
-        'Force refreshing state after subscription to:',
-        organizationId
-      )
 
       // Clear available organizations and reset loading states
       set({
@@ -284,7 +241,6 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
       // Fetch the new user organization
       await get().fetchUserOrganization()
 
-      console.log('State refreshed after subscription')
     } catch (error) {
       console.error('Error refreshing state after subscription:', error)
     }
@@ -292,7 +248,6 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
 
   // Force update all screens
   forceUpdateAllScreens: () => {
-    console.log('Forcing update of all screens')
     // This will trigger re-renders in all components using this store
     set((state) => ({ ...state }))
   },
@@ -300,46 +255,31 @@ export const useOrganizationStore = create<OrganizationState>((set, get) => ({
   // Force sync with auth store
   forceSyncWithAuthStore: async () => {
     try {
-      console.log('🔄 Force syncing with auth store...')
 
       const authState = useAuthStore.getState()
       const currentUser = authState.user
 
-      console.log('🔍 Current auth store state:', {
-        userId: currentUser?.id,
-        userOrganizationId: currentUser?.organizationId,
-        currentOrgId: get().userOrganization?.id,
-      })
 
       // If user has organizationId but we don't have userOrganization, fetch it
       if (currentUser?.organizationId && !get().userOrganization) {
-        console.log(
-          '🔄 User has organizationId but no userOrganization, fetching...'
-        )
         await get().fetchUserOrganization()
       }
 
       // If user doesn't have organizationId but we have userOrganization, clear it
       if (!currentUser?.organizationId && get().userOrganization) {
-        console.log(
-          '🔄 User has no organizationId but we have userOrganization, clearing...'
-        )
         set({ userOrganization: null })
       }
 
-      console.log('✅ Force sync completed')
     } catch (error) {
       console.error('💥 Error in force sync:', error)
     }
   },
 
   handleOrganizationNotFound: async () => {
-    console.log('Handling organization not found, clearing user organizationId')
 
     try {
       // Clear the invalid organizationId from the user
       await useAuthStore.getState().updateUser({ organizationId: undefined })
-      console.log('Successfully cleared invalid organizationId from user')
 
       // Clear organization state
       set({

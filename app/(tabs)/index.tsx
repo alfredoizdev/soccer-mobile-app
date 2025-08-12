@@ -33,24 +33,13 @@ export default function Index() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      console.log('Home page: User authenticated, fetching organization...')
-      console.log('User organizationId:', user.organizationId)
-      console.log('User object:', user)
 
       // Only fetch organization if user has organizationId
       if (user.organizationId) {
-        console.log(
-          'Home page: Fetching organization with ID:',
-          user.organizationId
-        )
         fetchUserOrganization()
       } else {
-        console.log(
-          'Home page: User has no organizationId, showing no team state'
-        )
       }
     } else {
-      console.log('Home page: User not authenticated or no user')
     }
 
     // Subscribe to user changes to auto-refresh when organizationId changes
@@ -65,9 +54,6 @@ export default function Index() {
   // Additional effect to handle user organizationId changes
   useEffect(() => {
     if (user?.organizationId) {
-      console.log(
-        'Home page: User organizationId changed, fetching organization...'
-      )
       fetchUserOrganization()
     }
   }, [user?.organizationId, fetchUserOrganization])
@@ -88,22 +74,11 @@ export default function Index() {
 
   const handleGamePress = (game: any) => {
     // TODO: Navigate to game details
-    console.log('Game pressed:', game)
   }
 
   const teamStats = getTeamStats()
 
   // Debug logging
-  console.log('Home page render state:', {
-    isAuthenticated,
-    hasUser: !!user,
-    userOrganizationId: user?.organizationId,
-    userOrganization,
-    isLoading,
-    error,
-    isInitialized,
-    hasAttemptedFetch,
-  })
 
   // Show loading state only when we're actually loading and have organizationId
   if (isLoading && user?.organizationId && !hasAttemptedFetch) {

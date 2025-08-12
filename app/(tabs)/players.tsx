@@ -40,9 +40,6 @@ export default function PlayersScreen() {
   // Additional effect to handle user organizationId changes
   useEffect(() => {
     if (user?.organizationId) {
-      console.log(
-        'Players page: User organizationId changed, fetching organization...'
-      )
       fetchUserOrganization()
     }
   }, [user?.organizationId, fetchUserOrganization])

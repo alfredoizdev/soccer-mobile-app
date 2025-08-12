@@ -178,45 +178,24 @@ class AuthService {
    */
   async updateUser(userData: Partial<User>): Promise<void> {
     try {
-      console.log('🔄 AuthService.updateUser called with:', userData)
-
       if (!this.user) {
-        console.log('❌ No user to update')
         throw new Error('No user to update')
       }
-
-      console.log('📝 Current user before update:', {
-        id: this.user.id,
-        name: this.user.name,
-        organizationId: this.user.organizationId,
-      })
 
       // Update user data
       this.user = { ...this.user, ...userData }
 
-      console.log('✅ User updated in memory:', {
-        id: this.user.id,
-        name: this.user.name,
-        organizationId: this.user.organizationId,
-      })
-
       // Store updated user in AsyncStorage
-      console.log('💾 Storing updated user in AsyncStorage...')
       await this.storeUser(this.user)
-      console.log('✅ Successfully stored updated user in AsyncStorage')
 
       // Verify the user was stored correctly
       const storedUserData = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_USER)
       if (storedUserData) {
         const storedUser = JSON.parse(storedUserData)
-        console.log('🔍 Verifying stored user in AsyncStorage:', {
-          id: storedUser.id,
-          name: storedUser.name,
-          organizationId: storedUser.organizationId,
-        })
+        console.log('User updated successfully:', storedUser.id)
       }
     } catch (error) {
-      console.error('💥 Error updating user in AuthService:', error)
+      console.error('Error updating user in AuthService:', error)
       throw error
     }
   }

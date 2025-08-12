@@ -26,6 +26,8 @@ export function PlayersSection({
           horizontal
           showsHorizontalScrollIndicator={false}
           className='mb-6'
+          style={{ height: 240 }}
+          contentContainerStyle={{ paddingBottom: 20 }}
         >
           {players.map((player) => (
             <PlayerCard

@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,6 +10,7 @@ import {
   View,
 } from 'react-native'
 import { useAuthStore } from '../../stores/auth-store'
+import { ToastService } from '../../services/toast-service'
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
@@ -25,7 +25,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields')
+      ToastService.error('Please fill in all fields')
       return
     }
 
